@@ -66,40 +66,28 @@ function createEvent(msg, filter, name, invited) {
         .setColor(0xdd9323)
         .setFooter(`ID: ${msg.author.id}`);
 
-    makeChannel(name, msg);
-    console.log(embed.title);
-    console.log(msg.id);
-
-    let col = msg.createReactionCollector(filter);
-    col.on('collect', r => {
-        msg.channel.send(`User **${r.users.last().username}** reacted with TICK`);
-        console.log(msg);
-    });
-
+    makeChannel(name, msg); 
 
     msg.channel.send(embed).then(async msg => {
-        await msg.react('✅');
-        
-        //await msg.react('❌');
 
-        msg.awaitReactions(filter, {
-            time: 30000,
-            max: 1,
-            error: ['time']
-        }).then(collected => {
-            const reaction = collected.first();
-            switch (reaction.emoji.name) {
+        await msg.react('✅');
+        await msg.react('❌');
+        // creates a collector that when a user reacts to the event the line(s) following col.on will run
+        let col = msg.createReactionCollector(filter);
+        col.on('collect', r => {
+            switch (r.emoji.name) {
                 case '✅':
-                    reactedUser = msg.reactions.get("✅").users.last().username
-                    msg.channel.send(`User **${reactedUser}** reacted with ✅`);
+                    msg.channel.send(`**${r.users.last().username}** is attending the event! ${r.emoji}`);
                     const yourchannel = msg.guild.channels.find(channel => channel.name === name)
-                    yourchannel.overwritePermissions(msg.reactions.get("✅").users.last(), { VIEW_CHANNEL: true });
+                    yourchannel.overwritePermissions(r.users.last(), { VIEW_CHANNEL: true });
                     break;
                 case '❌':
-                    msg.reply('CROSS');
+                    msg.channel.send(`**${r.users.last().username}** is not attending the event 😟`);
                     break;
             }
-        })
+            
+        });
+        
     });
 }
 
@@ -112,8 +100,9 @@ client.once('ready', () => {
 });
 
 client.on('message', msg => {
+    // sets to which emoji's any collector will run given this parameter
     const filter = (reaction, user) => {
-        return reaction.emoji.name === '✅';
+        return reaction.emoji.name === '✅' || reaction.emoji.name === '❌';
     };
 
     if (msg.content.startsWith(`${prefix}createevent`)) {
@@ -165,4 +154,4 @@ client.on('message', msg => {
 });
 
 // login to Discord with your app's token
-client.login('NjY5Nzg2NzczOTE1OTU5MzQ1.Xik5vw.hp60boFDOp802El2wb2oMYt6wM0');
+client.login('NjY5Nzg2NzczOTE1OTU5MzQ1.XmTu5w.qlEQLZzLcPBL_XfDax-Tw25Yl84');
