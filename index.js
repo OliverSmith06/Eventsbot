@@ -46,7 +46,7 @@ function createRole(name, msg) {
     msg.guild.createRole({ name: `${name}`, hoist: true, mentionable: false });
 }
 
-function createEvent(msg, filter, name, invited) {
+function createEvent(msg, filter, name, invited, desc) {
 
     invitedarr = [];
     for (let step = 0; step < invited.length; step++) {
@@ -58,10 +58,10 @@ function createEvent(msg, filter, name, invited) {
     msg.channel.send(invitedarr);
 
     const embed = new Discord.RichEmbed()
-        .setTitle('Available Options')
+        .setTitle(`${name}`)
         .setDescription(`
-                    Is anyone interested in
-                    **${name}**? If so, respond with ✅
+                    
+                    ${desc}
                 `)
         .setColor(0xdd9323)
         .setFooter(`ID: ${msg.author.id}`);
@@ -78,7 +78,8 @@ function createEvent(msg, filter, name, invited) {
             switch (r.emoji.name) {
                 case '✅':
                     msg.channel.send(`**${r.users.last().username}** is attending the event! ${r.emoji}`);
-                    const yourchannel = msg.guild.channels.find(channel => channel.name === name)
+                    parsedName = name.toLowerCase();
+                    const yourchannel = msg.guild.channels.find(channel => channel.name === parsedName)
                     yourchannel.overwritePermissions(r.users.last(), { VIEW_CHANNEL: true });
                     break;
                 case '❌':
@@ -106,13 +107,24 @@ client.on('message', msg => {
     };
 
     if (msg.content.startsWith(`${prefix}createevent`)) {
-        var args = msg.content.split(' ');
+        // msg.content.split(' ');
+        var descarr = msg.content.split('"');
+       
+        var desc = descarr[1];
+        delete descarr[1];
+        //console.log(descarr);
+        var args = descarr.toString();
+        var args = args.replace(/,/g, "");
+        var args = args.split(' ');
+        console.log(args);
         var name = args[1];
         var invited = [""];
-        var invited = args[2];
-        var invitedarr = invited.split(',');
+        
+        var invited = args[3];
+        console.log(invited);
+        var invitedarr = invited.split('-');
         //console.log(invitedarr);
-        createEvent(msg, filter, name, invitedarr);
+        createEvent(msg, filter, name, invitedarr, desc);
     }
 
     if (msg.content === 'ping') {
@@ -154,4 +166,4 @@ client.on('message', msg => {
 });
 
 // login to Discord with your app's token
-client.login('NjY5Nzg2NzczOTE1OTU5MzQ1.XmTu5w.qlEQLZzLcPBL_XfDax-Tw25Yl84');
+client.login('NjY5Nzg2NzczOTE1OTU5MzQ1.XmXbug.QRP54mCpZ6v-XDOSmZ1ML5V8Fvs');
